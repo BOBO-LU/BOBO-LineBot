@@ -16,9 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url
-from application.views import sayhello
+import application.views as views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', sayhello)
+    url(r'^$', views.sayhello),
+    url(r'^hello2/(\w+)/$', views.hello2)
 ]
