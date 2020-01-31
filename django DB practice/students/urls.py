@@ -15,7 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls import url
+from studentsapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^listone/$', views.listone),
+    url(r'^listall/$', views.listall),
+
+    url(r'^insert/$', views.insert),
+    url(r'^modify/$', views.modify),
+    url(r'^delete/$', views.delete),
 ]
+
