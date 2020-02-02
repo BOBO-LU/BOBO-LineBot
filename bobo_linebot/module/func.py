@@ -36,19 +36,29 @@ def text_filter(event):
                 sleep(20)
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text='乾我什麼事'))
                 break
-            if case('quickreply'):
+            if case('q'):
                 message = TextSendMessage(
                     text = " i am bobo",
                     quick_reply = QuickReply(
                         items = [
                             QuickReplyButton(
-                                action = MessageAction(label = 'but1', text = 'text1')
+                                action = MessageAction(label = 'LOVE', text = 'LOVE')
                             ),
                             QuickReplyButton(
-                                action = MessageAction(label = 'but2', text = 'text2')
+                                image_url = "https://i.ibb.co/dJPnTr9/pika-icon.png",
+                                action = {
+                                "type": "message",
+                                "label": "Tempura",
+                                "text": "PIKACHU"
+                                }
                             ),
                             QuickReplyButton(
-                                action = CameraAction('camera')
+                                image_url = "https://i.ibb.co/dJPnTr9/pika-icon.png",
+                                action = {
+                                "type": "message",
+                                "label": "Tempura",
+                                "text": "PIKACHU"
+                                }
                             ),
                             QuickReplyButton(action = 
                                 {
