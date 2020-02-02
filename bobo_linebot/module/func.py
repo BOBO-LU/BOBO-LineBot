@@ -5,13 +5,13 @@
 from application.tools import switch, getException
 from django.conf import settings
 from linebot import LineBotApi
-from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction
+from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction, CameraAction
 from time import sleep
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
 #針對不同文字處理不同訊息
 def text_filter(event): 
-    text = event.message.text
+    text = event.message.text.lower()
     userid = event.source.user_id
     try:
         
@@ -38,7 +38,7 @@ def text_filter(event):
                 break
             if case('quickreply'):
                 message = TextSendMessage(
-                    text = "i am bobo",
+                    text = " i am bobo",
                     quick_reply = QuickReply(
                         items = [
                             QuickReplyButton(
@@ -46,16 +46,27 @@ def text_filter(event):
                             ),
                             QuickReplyButton(
                                 action = MessageAction(label = 'but2', text = 'text2')
+                            ),
+                            QuickReplyButton(
+                                action = CameraAction('camera')
+                            ),
+                            QuickReplyButton(action = 
+                                {
+                                "type":"camera",
+                                "label":"Camera"
+                                }
                             )
                         ]
                     )
                 )
+                
                 line_bot_api.reply_message(event.reply_token, message)
+                break
             if case():
                 print(event.reply_token)
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=event.message.text)) #回應同一個訊息
                 #line_bot_api.push_message('U4f9b4c95fcee10fc8c72ad40cbef90ca', TextSendMessage(text=event.message.text+", send by "+event.source.user_id))
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=event.message.text+'2'))
+                #line_bot_api.reply_message(event.reply_token, TextSendMessage(text=event.message.text+'2'))
                 break
 
     except Exception as e:
@@ -102,5 +113,27 @@ def push_location_message(userid, title = "", address = "", latitude = 0.0, long
     except Exception as e:
         getException(e)
 
-#def reply_quickreply_message():
+def push_quickreply_message(userid, buttons):
+    try:
+        for i in buttons:
+            print()
+        message = TextSendMessage(
+            text = "i am bobo",
+            quick_reply = QuickReply(
+                items = [
+                    QuickReplyButton(
+                        action = MessageAction(label = 'but1', text = 'text1')
+                    ),
+                    QuickReplyButton(
+                        action = MessageAction(label = 'but2', text = 'text2')
+                    ),
+                    QuickReplyButton(
+                        action = CameraAction('camera')
+                    )
+                ]
+            )
+        )
+        line_bot_api.push_message(userid, message)
+    except Exception as e:
+        getException(e)
 
