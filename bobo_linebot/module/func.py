@@ -5,8 +5,8 @@
 from application.tools import switch, getException
 from django.conf import settings
 from linebot import LineBotApi
-from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage
-
+from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction
+from time import sleep
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
 #針對不同文字處理不同訊息
@@ -32,12 +32,34 @@ def text_filter(event):
             if case('小火龍'):
                 push_image_message(userid, 'https://i.imgur.com/zTbh6K1.jpg', 'https://i.imgur.com/zTbh6K1.jpg')
                 break
+            if case('等'):
+                sleep(20)
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text='乾我什麼事'))
+                break
+            if case('quickreply'):
+                message = TextSendMessage(
+                    text = "i am bobo",
+                    quick_reply = QuickReply(
+                        items = [
+                            QuickReplyButton(
+                                action = MessageAction(label = 'but1', text = 'text1')
+                            ),
+                            QuickReplyButton(
+                                action = MessageAction(label = 'but2', text = 'text2')
+                            )
+                        ]
+                    )
+                )
+                line_bot_api.reply_message(event.reply_token, message)
             if case():
+                print(event.reply_token)
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=event.message.text)) #回應同一個訊息
-                line_bot_api.push_message('U4f9b4c95fcee10fc8c72ad40cbef90ca', TextSendMessage(text=event.message.text+", send by "+event.source.user_id))
+                #line_bot_api.push_message('U4f9b4c95fcee10fc8c72ad40cbef90ca', TextSendMessage(text=event.message.text+", send by "+event.source.user_id))
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=event.message.text+'2'))
                 break
 
     except Exception as e:
+        print("exception")
         getException(e)
 
 
@@ -79,3 +101,6 @@ def push_location_message(userid, title = "", address = "", latitude = 0.0, long
         line_bot_api.push_message(userid, message)
     except Exception as e:
         getException(e)
+
+#def reply_quickreply_message():
+
