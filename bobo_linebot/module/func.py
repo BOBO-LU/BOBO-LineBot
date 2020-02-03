@@ -3,9 +3,11 @@
 1. 對話模式切換，有點像是shell中開啟vim，進入該模式中直到離開前，會有另外一個filter來處理這些訊息。(可能要用到multi-thread)
 """
 from application.tools import switch, getException
+from application.models import users
+
 from django.conf import settings
 from linebot import LineBotApi
-from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction, CameraAction
+from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction, CameraAction ,DatetimePickerAction
 from time import sleep
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
@@ -13,6 +15,12 @@ line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 def text_filter(event): 
     text = event.message.text.lower()
     userid = event.source.user_id
+
+    #檢查資料庫是否有userid，沒有的話插入
+    if not ( users.objects.filter( uid = userid ).exists()):
+        unit = users.objects.create( uid = userid )
+        unit.save()
+
     try:
         
         for case in switch(text):
@@ -65,12 +73,21 @@ def text_filter(event):
                                 "type":"camera",
                                 "label":"Camera"
                                 }
+                            ),
+                            QuickReplyButton(
+                                action = DatetimePickerAction(label="depart date", data="data3", mode="date")
+                            ),
+                            QuickReplyButton(
+                                action = DatetimePickerAction(label="depart time", data="data3", mode="time")
                             )
                         ]
                     )
                 )
                 
                 line_bot_api.reply_message(event.reply_token, message)
+                break
+            if case('push'):
+                push_text_message('Udd66eba9352626779fee2fff43c79f82', 'i am bobo') #蕭瑞昕的ID
                 break
             if case():
                 print(event.reply_token)
