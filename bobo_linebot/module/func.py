@@ -9,6 +9,9 @@ from django.conf import settings
 from linebot import LineBotApi
 from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction, CameraAction ,DatetimePickerAction
 from time import sleep
+
+from module import bullshit
+
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
 
@@ -25,6 +28,11 @@ def text_filter(event):
 
     try:
         for case in switch(text):
+            if case('b'):
+                content = str(bullshit.bullshit())
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
+                #push_text_message(userid,""+content)
+                break
             if case('userid'):
                 push_text(userid,"userid : "+event.source.user_id)
                 push_text('U4f9b4c95fcee10fc8c72ad40cbef90ca',event.message.text+", send by "+event.source.user_id)

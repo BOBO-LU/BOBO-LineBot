@@ -7,4 +7,4 @@ class studentAdmin(admin.ModelAdmin) :
     search_fields = ( 'cName', ) #依照欄位搜尋
     ordering = ( 'id', ) #排序
 
-admin.site.register(student,studentAdmin)
+admin.site.register(student,studentAdmin)   
