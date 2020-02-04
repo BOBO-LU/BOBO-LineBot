@@ -11,6 +11,8 @@ from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessag
 from time import sleep
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
+
+
 #針對不同文字處理不同訊息
 def text_filter(event): 
     text = event.message.text.lower()
@@ -22,23 +24,22 @@ def text_filter(event):
         unit.save()
 
     try:
-        
         for case in switch(text):
             if case('userid'):
-                push_text_message(userid,"userid : "+event.source.user_id)
-                line_bot_api.push_message('U4f9b4c95fcee10fc8c72ad40cbef90ca', TextSendMessage(text=event.message.text+", send by "+event.source.user_id))
+                push_text(userid,"userid : "+event.source.user_id)
+                push_text('U4f9b4c95fcee10fc8c72ad40cbef90ca',event.message.text+", send by "+event.source.user_id)
                 break
             if case('test'):
-                line_bot_api.push_message(userid, TextSendMessage(text='test'))
+                push_text(userid, 'test')
                 break
             if case('肚子餓') and userid != 'U715b0aba205ddf78123b47ffb8f28f52': #如果是妹妹，就不能說不好的話
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text='乾我什麼事'))
                 break
             if case('變身'):
-                push_image_message(userid, 'https://i.imgur.com/zTbh6K1.jpg', 'https://i.imgur.com/CNhnRs2.jpg')
+                push_image(userid, 'https://i.imgur.com/zTbh6K1.jpg', 'https://i.imgur.com/CNhnRs2.jpg')
                 break
             if case('小火龍'):
-                push_image_message(userid, 'https://i.imgur.com/zTbh6K1.jpg', 'https://i.imgur.com/zTbh6K1.jpg')
+                push_image(userid, 'https://i.imgur.com/zTbh6K1.jpg', 'https://i.imgur.com/zTbh6K1.jpg')
                 break
             if case('等'):
                 sleep(20)
@@ -87,7 +88,7 @@ def text_filter(event):
                 line_bot_api.reply_message(event.reply_token, message)
                 break
             if case('push'):
-                push_text_message('Udd66eba9352626779fee2fff43c79f82', 'i am bobo') #蕭瑞昕的ID
+                push_text('Udd66eba9352626779fee2fff43c79f82', 'i am bobo') #蕭瑞昕的ID
                 break
             if case():
                 print(event.reply_token)
@@ -101,14 +102,14 @@ def text_filter(event):
         getException(e)
 
 
-def push_text_message(userid, text):
+def push_text(userid, text):
     try:
         message = TextSendMessage(text=text)
         line_bot_api.push_message(userid, message)
     except Exception as e:
         getException(e)
 
-def push_image_message(userid, original, preview):
+def push_image(userid, original, preview):
     try:
         message = ImageSendMessage(
             original_content_url = original,
@@ -118,7 +119,7 @@ def push_image_message(userid, original, preview):
     except Exception as e:
         getException(e)
 
-def push_sticker_message(userid, package = 1, sticker = 1):
+def push_sticker(userid, package = 1, sticker = 1):
     try:
         message = ImageSendMessage(
             package_id = package,
@@ -128,7 +129,7 @@ def push_sticker_message(userid, package = 1, sticker = 1):
     except Exception as e:
         getException(e)
 
-def push_location_message(userid, title = "", address = "", latitude = 0.0, longtitude = 0.0):
+def push_location(userid, title = "", address = "", latitude = 0.0, longtitude = 0.0):
     try:
         message = LocationSendMessage(
             title = title,
@@ -140,7 +141,7 @@ def push_location_message(userid, title = "", address = "", latitude = 0.0, long
     except Exception as e:
         getException(e)
 
-def push_quickreply_message(userid, buttons):
+def push_quickreply(userid, buttons):
     try:
         for i in buttons:
             print()
