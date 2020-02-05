@@ -18,7 +18,8 @@ def text_filter(event):
     text = event.message.text.lower()
     userid = event.source.user_id
 
-    if text[0] == 's' or 'S':
+    if text[0] == ('s' or 'S'):
+        print(text)
         input_id = text[slice(1,len(text))]
         content = str(stock.find_stock_price(input_id))
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
