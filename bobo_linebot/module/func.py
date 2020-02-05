@@ -10,16 +10,23 @@ from linebot import LineBotApi
 from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction, CameraAction ,DatetimePickerAction
 from time import sleep
 
-from module import bullshit
+from module import bullshit, stock
 
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
-
-
-#針對不同文字處理不同訊息
-def text_filter(event): 
+def text_filter(event):
     text = event.message.text.lower()
     userid = event.source.user_id
+
+    if text[0] == 's' or 'S':
+        input_id = text[slice(1,len(text))]
+        content = str(stock.find_stock_price(input_id))
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
+    else:
+        text_filter_1(event,text,userid)
+
+#針對不同文字處理不同訊息
+def text_filter_1(event, text, userid): 
 
     #檢查資料庫是否有userid，沒有的話插入
     if not ( users.objects.filter( uid = userid ).exists()):
