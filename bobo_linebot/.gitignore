@@ -1,3 +1,6 @@
 application/views.py
 bobo_linebot/settings.py
+
 *.pyc
+*.cpython-37.pyc
+
