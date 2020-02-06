@@ -9,7 +9,7 @@ import datetime as dt
 """
 
 class checktime():
-    def __init__ (self,hour=21,minute=2):
+    def __init__ (self, hour=21, minute=2):
         #設定常數時間
         self.hour = hour #24小時制
         self.minute = minute
@@ -27,4 +27,10 @@ class checktime():
                 print( dt.datetime.now().hour, dt.datetime.now().minute, dt.datetime.now().second)
                 time.sleep(30)
 
-            
+
+
+"""
+import time
+
+time.strftime("%Y/%m/%d")
+""" 

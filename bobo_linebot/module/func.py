@@ -29,45 +29,37 @@ def text_mode_filter(event):
         unit = users.objects.create(uid=userid, mode="none")
         unit.save()
 
-    temp = users.objects.filter(uid=userid)
-    print('temp : ', temp)
-    print('temp.value() : ', temp.values('chat_mode'))
-    print('list(temp) : ', list(temp))
-    for case in switch(temp):
-        
+    mode = users.objects.filter(uid=userid).values('chat_mode')[0]['chat_mode']
+
+    for case in switch(mode):
         if case('stock'):
-            stock_mode()
+            stock_mode(event, text, userid, mode)
             break
         if case():
             normal_mode(event, text, userid)
             break
 
     
-def stock_mode():
+def stock_mode(event, text, userid, mode):
     print('in stock mode')
+    if case('l'):
+        users.objects.filter(uid=userid).update(chat_mode="none")
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='離開'+mode+'模式'))
 
 #針對不同文字處理不同訊息
 def normal_mode(event, text, userid): 
-    # try:
-    #     if text[0] == ('s' or 'S'):
-            
-    #         
-            
-        
-    # except Exception as _e:
-    #     print(_e)
-
     try:
         for case in switch(text):
-            if case('s' or 'S'):
+            if case('s' or 'S'): #進入stock模式
                 users.objects.filter(uid=userid).update(chat_mode="stock")
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text='進入stock模式'))
                 break
             if case('b' or 'B'):
                 content = str(bullshit.bullshit())
+                users.objects.filter(uid=userid).update(chat_mode="bullshit")
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
-                #push_text_message(userid,""+content)
                 break
+            
             if case('userid'):
                 push_text(userid, "userid : "+event.source.user_id)
                 push_text('U4f9b4c95fcee10fc8c72ad40cbef90ca',event.message.text+", send by "+event.source.user_id)
@@ -135,7 +127,7 @@ def normal_mode(event, text, userid):
                 break
             if case():
                 print(event.reply_token)
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=event.message.text)) #回應同一個訊息
+                reply_text(event, event.message.text) #回應同一個訊息
                 #line_bot_api.push_message('U4f9b4c95fcee10fc8c72ad40cbef90ca', TextSendMessage(text=event.message.text+", send by "+event.source.user_id))
                 #line_bot_api.reply_message(event.reply_token, TextSendMessage(text=event.message.text+'2'))
                 break
@@ -144,7 +136,14 @@ def normal_mode(event, text, userid):
         print("exception")
         getException(e)
 
-
+def reply_text(event, text):
+    try:
+        message = TextSendMessage(text=text)
+        token = event.reply_token
+        line_bot_api.reply_message(token, message)
+    except Exception as e:
+        getException(e)
+    
 def push_text(userid, text):
     try:
         message = TextSendMessage(text=text)
