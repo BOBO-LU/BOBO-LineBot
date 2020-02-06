@@ -14,5 +14,3 @@ def find_stock_price( stock_id = '2330' ):
     print(f"台積電昨日收盤價：${last_close}")
     return f"${stock_id}昨日收盤價：${last_close}"
 
-text = '0123456789'
-print(text[0:2])
