@@ -1,12 +1,8 @@
 """
 代辦事項:
 1. 對話模式切換，有點像是shell中開啟vim，進入該模式中直到離開前，會有另外一個filter來處理這些訊息。(可能要用到multi-thread)
-<<<<<<< HEAD
-2. 待切換模式: bullshit stock
-=======
 2. 模式流程
 訊息判斷(views) > 模式過濾(mode) > 文字過濾(text) 
->>>>>>> 616fc53b6ac73fa62c477f29904f6eb5d5e2a178
 """
 from time import sleep
 from django.conf import settings
