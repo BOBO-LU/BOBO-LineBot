@@ -1,48 +1,75 @@
 """
 代辦事項:
 1. 對話模式切換，有點像是shell中開啟vim，進入該模式中直到離開前，會有另外一個filter來處理這些訊息。(可能要用到multi-thread)
+2. 模式流程
+訊息判斷(views) > 模式過濾(mode) > 文字過濾(text) 
 """
-from application.tools import switch, getException
-from application.models import users
-
+from time import sleep
 from django.conf import settings
 from linebot import LineBotApi
-from linebot.models import TextSendMessage, ImageSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction, CameraAction ,DatetimePickerAction
-from time import sleep
+from linebot.models import (
+    TextSendMessage, ImageSendMessage, LocationSendMessage,
+    QuickReply, QuickReplyButton, MessageAction,
+    CameraAction, DatetimePickerAction
+)
+
+from application.tools import switch, getException
+from application.models import users
 
 from module import bullshit, stock
 
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
-def text_filter(event):
+def text_mode_filter(event):
+
     text = event.message.text.lower()
     userid = event.source.user_id
+    #檢查資料庫是否有userid，沒有的話插入
+    if not users.objects.filter(uid=userid).exists():
+        unit = users.objects.create(uid=userid, mode="none")
+        unit.save()
 
-    if text[0] == ('s' or 'S'):
-        print(text)
-        input_id = text[slice(1,len(text))]
-        content = str(stock.find_stock_price(input_id))
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
-    else:
-        text_filter_1(event,text,userid)
+    temp = users.objects.filter(uid=userid)
+    print('temp : ', temp)
+    print('temp.value() : ', temp.values('chat_mode'))
+    print('list(temp) : ', list(temp))
+    for case in switch(temp):
+        
+        if case('stock'):
+            stock_mode()
+            break
+        if case():
+            normal_mode(event, text, userid)
+            break
+
+    
+def stock_mode():
+    print('in stock mode')
 
 #針對不同文字處理不同訊息
-def text_filter_1(event, text, userid): 
-
-    #檢查資料庫是否有userid，沒有的話插入
-    if not ( users.objects.filter( uid = userid ).exists()):
-        unit = users.objects.create( uid = userid )
-        unit.save()
+def normal_mode(event, text, userid): 
+    # try:
+    #     if text[0] == ('s' or 'S'):
+            
+    #         
+            
+        
+    # except Exception as _e:
+    #     print(_e)
 
     try:
         for case in switch(text):
-            if case('b'):
+            if case('s' or 'S'):
+                users.objects.filter(uid=userid).update(chat_mode="stock")
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text='進入stock模式'))
+                break
+            if case('b' or 'B'):
                 content = str(bullshit.bullshit())
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
                 #push_text_message(userid,""+content)
                 break
             if case('userid'):
-                push_text(userid,"userid : "+event.source.user_id)
+                push_text(userid, "userid : "+event.source.user_id)
                 push_text('U4f9b4c95fcee10fc8c72ad40cbef90ca',event.message.text+", send by "+event.source.user_id)
                 break
             if case('test'):
@@ -63,39 +90,39 @@ def text_filter_1(event, text, userid):
                 break
             if case('q'):
                 message = TextSendMessage(
-                    text = " i am bobo",
-                    quick_reply = QuickReply(
-                        items = [
+                    text=" i am bobo",
+                    quick_reply=QuickReply(
+                        items=[
                             QuickReplyButton(
-                                action = MessageAction(label = 'LOVE', text = 'LOVE')
+                                action=MessageAction(label='LOVE', text='LOVE')
                             ),
                             QuickReplyButton(
-                                image_url = "https://i.ibb.co/dJPnTr9/pika-icon.png",
-                                action = {
+                                image_url="https://i.ibb.co/dJPnTr9/pika-icon.png",
+                                action={
                                 "type": "message",
                                 "label": "Tempura",
                                 "text": "PIKACHU"
                                 }
                             ),
                             QuickReplyButton(
-                                image_url = "https://i.ibb.co/dJPnTr9/pika-icon.png",
-                                action = {
+                                image_url="https://i.ibb.co/dJPnTr9/pika-icon.png",
+                                action={
                                 "type": "message",
                                 "label": "Tempura",
                                 "text": "PIKACHU"
                                 }
                             ),
-                            QuickReplyButton(action = 
+                            QuickReplyButton(action=
                                 {
                                 "type":"camera",
                                 "label":"Camera"
                                 }
                             ),
                             QuickReplyButton(
-                                action = DatetimePickerAction(label="depart date", data="data3", mode="date")
+                                action=DatetimePickerAction(label="depart date", data="data3", mode="date")
                             ),
                             QuickReplyButton(
-                                action = DatetimePickerAction(label="depart time", data="data3", mode="time")
+                                action=DatetimePickerAction(label="depart time", data="data3", mode="time")
                             )
                         ]
                     )
@@ -145,13 +172,13 @@ def push_sticker(userid, package = 1, sticker = 1):
     except Exception as e:
         getException(e)
 
-def push_location(userid, title = "", address = "", latitude = 0.0, longtitude = 0.0):
+def push_location(userid, title="", address="", latitude=0.0, longtitude=0.0):
     try:
         message = LocationSendMessage(
-            title = title,
-            address = address,
-            latitude = latitude,
-            longtitude = longtitude
+            title=title,
+            address=address,
+            latitude=latitude,
+            longtitude=longtitude
         )
         line_bot_api.push_message(userid, message)
     except Exception as e:
@@ -160,7 +187,7 @@ def push_location(userid, title = "", address = "", latitude = 0.0, longtitude =
 def push_quickreply(userid, buttons):
     try:
         for i in buttons:
-            print()
+            print(i)
         message = TextSendMessage(
             text = "i am bobo",
             quick_reply = QuickReply(
@@ -180,4 +207,3 @@ def push_quickreply(userid, buttons):
         line_bot_api.push_message(userid, message)
     except Exception as e:
         getException(e)
-
