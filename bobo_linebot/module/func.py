@@ -1,6 +1,7 @@
 """
 代辦事項:
 1. 對話模式切換，有點像是shell中開啟vim，進入該模式中直到離開前，會有另外一個filter來處理這些訊息。(可能要用到multi-thread)
+2. 待切換模式: bullshit stock
 """
 from application.tools import switch, getException
 from application.models import users
@@ -19,8 +20,8 @@ def text_filter(event):
     userid = event.source.user_id
 
     if text[0] == 's' or 'S':
-        input_id = text[slice(1,len(text))]
-        content = str(stock.find_stock_price(input_id))
+        input_id = text[1:len(text)]
+        content = str(stock.yahoo_stock_crawler(input_id)[close_price])
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
     else:
         text_filter_1(event,text,userid)
