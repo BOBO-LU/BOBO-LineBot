@@ -4,6 +4,10 @@
 2. 模式流程
 訊息判斷(views) > 模式過濾(text_mode_filter) > 文字過濾(text) > 對應功能 
 
+需求:
+1. 輸入指令，進入特殊模式，產生新的對應指令
+2. 可以離開模式
+3. 輸入h可以顯示幫助內容
 """
 from time import sleep
 from django.conf import settings
@@ -57,12 +61,14 @@ def bullshit_mode(event, text, userid, mode):
 
 def stock_mode(event, text, userid, mode):
     print('in stock mode')
-    for case in switch(text):
-        if case('l'):
+    for case.lower() in switch(text):
+        if case('leave' or 'l'):
             leave_mode(event, text, userid, mode)
             break
-        if case():
+        if case('check' or 'c'):
             reply_text(event, '錯誤指令')
+            break
+        if case():
             break
 
 #針對不同文字處理不同訊息
@@ -71,11 +77,13 @@ def normal_mode(event, text, userid):
         for case in switch(text):
             if case('s' or 'S'): #進入stock模式
                 users.objects.filter(uid=userid).update(chat_mode="stock")
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text='進入stock模式'))
+                content = '進入股票模式'
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
-            if case('b' or 'B'):
-                content = str(bullshit.bullshit())
+            if case('b' or 'B'):#進入bullshit模式
+                #content = str(bullshit.bullshit())
                 users.objects.filter(uid=userid).update(chat_mode="bullshit")
+                content = "進入唬爛模式\n請輸入主題名稱:"
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
             

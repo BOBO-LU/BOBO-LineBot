@@ -1,6 +1,16 @@
 """
 代辦事項:
 1. text_filter過濾出文字，stock.py滿足資料
+
+需求:
+1. 爬股價資訊
+2. 輸入股價取得全部資訊
+3. 輸入股價與資訊類別取得特定資訊
+4. 離開模式
+5. 輸入觀察名單
+6. 顯示觀察名單
+7. 根據觀察名單輸出股價資料
+
 """
 from application.tools import switch
 from bs4 import BeautifulSoup
