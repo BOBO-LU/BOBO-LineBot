@@ -51,18 +51,22 @@ def text_mode_filter(event):
 def bullshit_mode(event, text, userid, mode):
     print('in bullshit mode')
     for case in switch(text):
-        if case('l'):
+        if case('leave' or 'l'):
             leave_mode(event, text, userid, mode)
             break
-        if case():
+        if case('check' or 'c'):
             reply_text(event, '錯誤指令')
+            break
+        if case():
+            content = str(mode_bullshit.bullshit(case))
+            reply_text(event, content)
             break
         
 
 def stock_mode(event, text, userid, mode):
     print('in stock mode')
-    for case.lower() in switch(text):
-        if case('leave' or 'l'):
+    for case in switch(text):
+        if case('L' or 'l'):
             leave_mode(event, text, userid, mode)
             break
         if case('check' or 'c'):

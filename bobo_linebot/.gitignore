@@ -1,4 +1,4 @@
-application/views.py
+# application/views.py
 bobo_linebot/settings.py
 
 *.pyc
