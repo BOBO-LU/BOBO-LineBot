@@ -8,6 +8,7 @@
 1. 輸入指令，進入特殊模式，產生新的對應指令
 2. 可以離開模式
 3. 輸入h可以顯示幫助內容
+4. 快速切換模式
 """
 from time import sleep
 from django.conf import settings
@@ -55,8 +56,12 @@ def bullshit_mode(event, text, userid, mode):
         if case('l'):
             leave_mode(event, text, userid, mode)
             break
-        if case('c'):
-            reply_text(event, '錯誤指令')
+        if case('h'):
+            help_content = "離開模式: L或l\n查看模式: M或m\n----\n產生幹話: {主題}\n指定長度: {主題},{長度}\n像是: 機器人,100"
+            reply_text(event, help_content)
+            break
+        if case('m'):
+            reply_text(event, mode+' mode')
             break
         if case():
             content = str(mode_bullshit.bullshit(text))
@@ -71,8 +76,12 @@ def stock_mode(event, text, userid, mode):
             print('L in stock mode')
             leave_mode(event, text, userid, mode)
             break
-        if case('c'):
-            reply_text(event, '錯誤指令')
+        if case('h'):
+            help_content = "離開模式: L或l\n查看模式: M或m\n----"
+            reply_text(event, help_content)
+            break
+        if case('m'):
+            reply_text(event, mode+' mode')
             break
         if case():
             break
@@ -89,7 +98,7 @@ def normal_mode(event, text, userid):
             if case('b'):#進入bullshit模式
                 #content = str(bullshit.bullshit())
                 users.objects.filter(uid=userid).update(chat_mode="bullshit")
-                content = "進入唬爛模式\n請輸入主題名稱:(離開模式輸入l)"
+                content = "進入唬爛模式\n請輸入主題名稱:(離開模式輸入L或l)"
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
             
