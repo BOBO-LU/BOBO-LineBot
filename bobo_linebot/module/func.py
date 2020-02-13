@@ -29,9 +29,10 @@ def text_mode_filter(event):
 
     text = event.message.text.lower()
     userid = event.source.user_id
+
     #檢查資料庫是否有userid，沒有的話插入
     if not users.objects.filter(uid=userid).exists():
-        unit = users.objects.create(uid=userid, mode="none")
+        unit = users.objects.create(uid=userid, chat_mode="none")
         unit.save()
 
     #取得userid在資料庫中chat_mode的欄位
@@ -49,27 +50,28 @@ def text_mode_filter(event):
             break
 
 def bullshit_mode(event, text, userid, mode):
-    print('in bullshit mode')
+    print('in bullshit mode, text = ',text)
     for case in switch(text):
-        if case('leave' or 'l'):
+        if case('l'):
             leave_mode(event, text, userid, mode)
             break
-        if case('check' or 'c'):
+        if case('c'):
             reply_text(event, '錯誤指令')
             break
         if case():
-            content = str(mode_bullshit.bullshit(case))
+            content = str(mode_bullshit.bullshit(text))
             reply_text(event, content)
             break
         
 
 def stock_mode(event, text, userid, mode):
-    print('in stock mode')
+    print('in stock mode, text = ',text)
     for case in switch(text):
-        if case('L' or 'l'):
+        if case('l'):
+            print('L in stock mode')
             leave_mode(event, text, userid, mode)
             break
-        if case('check' or 'c'):
+        if case('c'):
             reply_text(event, '錯誤指令')
             break
         if case():
@@ -79,15 +81,15 @@ def stock_mode(event, text, userid, mode):
 def normal_mode(event, text, userid): 
     try:
         for case in switch(text):
-            if case('s' or 'S'): #進入stock模式
+            if case('s'): #進入stock模式
                 users.objects.filter(uid=userid).update(chat_mode="stock")
                 content = '進入股票模式'
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
-            if case('b' or 'B'):#進入bullshit模式
+            if case('b'):#進入bullshit模式
                 #content = str(bullshit.bullshit())
                 users.objects.filter(uid=userid).update(chat_mode="bullshit")
-                content = "進入唬爛模式\n請輸入主題名稱:"
+                content = "進入唬爛模式\n請輸入主題名稱:(離開模式輸入l)"
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
             
