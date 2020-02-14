@@ -52,22 +52,25 @@ def text_mode_filter(event):
 
 def bullshit_mode(event, text, userid, mode):
     print('in bullshit mode, text = ',text)
-    for case in switch(text):
-        if case('l'):
-            leave_mode(event, text, userid, mode)
-            break
-        if case('h'):
-            help_content = "離開模式: L或l\n查看模式: M或m\n----\n產生幹話: {主題}\n指定長度: {主題},{長度}\n像是: 機器人,100"
-            reply_text(event, help_content)
-            break
-        if case('m'):
-            reply_text(event, mode+' mode')
-            break
-        if case():
-            content = str(mode_bullshit.bullshit(text))
-            reply_text(event, content)
-            break
-        
+    try:
+        for case in switch(text):
+            if case('l'):
+                leave_mode(event, text, userid, mode)
+                break
+            if case('h'):
+                help_content = "離開模式: L或l\n查看模式: M或m\n----\n產生幹話: {主題}\n指定長度: {主題},{長度}\n像是: 機器人,100"
+                reply_text(event, help_content)
+                break
+            if case('m'):
+                reply_text(event, mode+' mode')
+                break
+            if case():
+                content = str(mode_bullshit.bullshit(text))
+                reply_text(event, content)
+                break
+    except Exception as e:
+        getException(e)
+        reply_text(event, "伺服器繁忙，請稍後在試")
 
 def stock_mode(event, text, userid, mode):
     print('in stock mode, text = ',text)
@@ -84,6 +87,7 @@ def stock_mode(event, text, userid, mode):
             reply_text(event, mode+' mode')
             break
         if case():
+            content = str(mode_bullshit.yahoo_stock_crawler(text))
             break
 
 #針對不同文字處理不同訊息
@@ -92,7 +96,7 @@ def normal_mode(event, text, userid):
         for case in switch(text):
             if case('s'): #進入stock模式
                 users.objects.filter(uid=userid).update(chat_mode="stock")
-                content = '進入股票模式'
+                content = '進入股票模式，請輸入股票代碼:(離開模式輸入L或l)'
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
             if case('b'):#進入bullshit模式
