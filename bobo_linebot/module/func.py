@@ -2,6 +2,7 @@
 代辦事項:
 1. 對話模式切換，有點像是shell中開啟vim，進入該模式中直到離開前，會有另外一個filter來處理這些訊息。(可能要用到multi-thread)
 2. 模式流程
+
 訊息判斷(views) > 模式過濾(text_mode_filter) > 文字過濾(text) > 對應功能 
 
 需求:
@@ -9,6 +10,7 @@
 2. 可以離開模式
 3. 輸入h可以顯示幫助內容
 4. 快速切換模式
+
 """
 from time import sleep
 from django.conf import settings
