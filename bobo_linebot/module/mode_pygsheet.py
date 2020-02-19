@@ -14,7 +14,7 @@ wks = wb.worksheet_by_title("autorun test")
 print("wks:",wks)
 
 # 偵測該工作表最後一個 row
-col_a_data = wks.get_col(1, include_tailing_empty=False)
+col_a_data = wks.get_col(1, include_tailing_empty=False )
 last_row = len(col_a_data)+1
 print(last_row)
 
