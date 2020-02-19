@@ -45,7 +45,7 @@ class bullshit():
             driver.find_element_by_id('minlen').send_keys(length)
             # sleep(.5)
             driver.find_element_by_id('btn-get-bullshit').click()
-            sleep(2.5)
+            sleep(3)
             self.content = driver.find_element_by_id('content').text
             print(self.content)
         except Exception as e:
