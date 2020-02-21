@@ -1,9 +1,0 @@
-line-bot-sdk
-pandas
-pyquery
-BeautifulSoup
-Django
-time
-selenium
-traceback
-sys
