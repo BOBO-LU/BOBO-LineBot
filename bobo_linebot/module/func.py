@@ -24,7 +24,7 @@ from linebot.models import (
 from application.tools import switch, getException
 from application.models import users
 
-from module import mode_bullshit, mode_stock, mode_gsheet
+from module import mode_bullshit, mode_stock, mode_gsheet, mode_gsheet_NTU
 
 LINE_BOT_API = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
@@ -51,6 +51,9 @@ def text_mode_filter(event):
             break
         if case('gsheet'):
             gsheet_mode(event, text, userid, mode)
+            break
+        if case('gsheet_NTU'):
+            gsheet_NTU_mode(event, text, userid, mode)
             break
         if case():
             normal_mode(event, text, userid)
@@ -116,7 +119,33 @@ def gsheet_mode(event, url, userid, mode):
             try:
                 mode_gsheet.update_googlesheet(url)
                 reply_text(event, 'update success')
-            except:
+            except Exception as e:
+                getException(e)
+                reply_text(event, 'woops! something went wrong')
+            break
+def gsheet_NTU_mode(event, url, userid, mode):
+    print('in stock mode, text = ',url)
+    for case in switch(url):
+        if case('l'):
+            print('L in stock mode')
+            leave_mode(event, url, userid, mode)
+            break
+        if case('h'):
+            help_content = "離開模式: L或l\n查看模式: M或m\n查看網址: URL或url----"
+            reply_text(event, help_content)
+            break
+        if case('m'):
+            reply_text(event, mode+' mode')
+            break
+        if case('url'):
+            reply_text(event, '網址為:https://docs.google.com/spreadsheets/d/1UL7R-E4kHF1ZqsnOcTi6uIw-I4BzfRyGF9gPh9-FKYk/edit?usp=sharing')
+            break
+        if case():
+            try:
+                mode_gsheet_NTU.update_googlesheet(url)
+                reply_text(event, 'update success')
+            except Exception as e:
+                getException(e)
                 reply_text(event, 'woops! something went wrong')
             break
 #針對不同文字處理不同訊息
@@ -137,6 +166,11 @@ def normal_mode(event, text, userid):
             if case('g'): #進入gsheet模式
                 users.objects.filter(uid=userid).update(chat_mode="gsheet")
                 content = '進入上傳模式，請輸入網址:(離開模式輸入L或l)'
+                LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text=content))
+                break
+            if case('hw'):#進入NTU hw 模式
+                users.objects.filter(uid=userid).update(chat_mode="gsheet_NTU")
+                content = '進入上傳模式(NTU pyxl作業)\n請輸入網址:(離開模式輸入L或l)'
                 LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
             if case('userid'):
@@ -160,7 +194,7 @@ def normal_mode(event, text, userid):
                 LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text='乾我什麼事'))
                 break
             if case('q'):
-                messa   ge = TextSendMessage(
+                message = TextSendMessage(
                     text=" i am bobo",
                     quick_reply=QuickReply(
                         items=[
