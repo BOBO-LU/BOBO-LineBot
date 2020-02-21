@@ -24,11 +24,12 @@ from linebot.models import (
 from application.tools import switch, getException
 from application.models import users
 
-from module import mode_bullshit, mode_stock
+from module import mode_bullshit, mode_stock, mode_gsheet, mode_gsheet_NTU
 
-line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
+LINE_BOT_API = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 
 def text_mode_filter(event):
+    """先判斷用戶屬於哪一種模式"""
 
     text = event.message.text.lower()
     userid = event.source.user_id
@@ -48,12 +49,20 @@ def text_mode_filter(event):
         if case('bullshit'):
             bullshit_mode(event, text, userid, mode)
             break
+        if case('gsheet'):
+            gsheet_mode(event, text, userid, mode)
+            break
+        if case('gsheet_NTU'):
+            gsheet_NTU_mode(event, text, userid, mode)
+            break
         if case():
             normal_mode(event, text, userid)
             break
 
 def bullshit_mode(event, text, userid, mode):
-    print('in bullshit mode, text = ',text)
+    """用戶為bullshit_mode下的語句判斷"""
+    
+    print('in bullshit mode, text = ', text)
     try:
         for case in switch(text):
             if case('l'):
@@ -89,9 +98,56 @@ def stock_mode(event, text, userid, mode):
             reply_text(event, mode+' mode')
             break
         if case():
-            content = str(mode_bullshit.yahoo_stock_crawler(text))
+            content = str(mode_stock.yahoo_stock_crawler(text))
             break
 
+def gsheet_mode(event, url, userid, mode):
+    print('in stock mode, text = ',url)
+    for case in switch(url):
+        if case('l'):
+            print('L in stock mode')
+            leave_mode(event, url, userid, mode)
+            break
+        if case('h'):
+            help_content = "離開模式: L或l\n查看模式: M或m\n----"
+            reply_text(event, help_content)
+            break
+        if case('m'):
+            reply_text(event, mode+' mode')
+            break
+        if case():
+            try:
+                mode_gsheet.update_googlesheet(url)
+                reply_text(event, 'update success')
+            except Exception as e:
+                getException(e)
+                reply_text(event, 'woops! something went wrong')
+            break
+def gsheet_NTU_mode(event, url, userid, mode):
+    print('in stock mode, text = ',url)
+    for case in switch(url):
+        if case('l'):
+            print('L in stock mode')
+            leave_mode(event, url, userid, mode)
+            break
+        if case('h'):
+            help_content = "離開模式: L或l\n查看模式: M或m\n查看網址: URL或url----"
+            reply_text(event, help_content)
+            break
+        if case('m'):
+            reply_text(event, mode+' mode')
+            break
+        if case('url'):
+            reply_text(event, '網址為:https://docs.google.com/spreadsheets/d/1UL7R-E4kHF1ZqsnOcTi6uIw-I4BzfRyGF9gPh9-FKYk/edit?usp=sharing')
+            break
+        if case():
+            try:
+                mode_gsheet_NTU.update_googlesheet(url)
+                reply_text(event, 'update success')
+            except Exception as e:
+                getException(e)
+                reply_text(event, 'woops! something went wrong')
+            break
 #針對不同文字處理不同訊息
 def normal_mode(event, text, userid): 
     try:
@@ -99,15 +155,24 @@ def normal_mode(event, text, userid):
             if case('s'): #進入stock模式
                 users.objects.filter(uid=userid).update(chat_mode="stock")
                 content = '進入股票模式，請輸入股票代碼:(離開模式輸入L或l)'
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
+                LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
             if case('b'):#進入bullshit模式
                 #content = str(bullshit.bullshit())
                 users.objects.filter(uid=userid).update(chat_mode="bullshit")
                 content = "進入唬爛模式\n請輸入主題名稱:(離開模式輸入L或l)"
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
+                LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text=content))
                 break
-            
+            if case('g'): #進入gsheet模式
+                users.objects.filter(uid=userid).update(chat_mode="gsheet")
+                content = '進入上傳模式，請輸入網址:(離開模式輸入L或l)'
+                LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text=content))
+                break
+            if case('hw'):#進入NTU hw 模式
+                users.objects.filter(uid=userid).update(chat_mode="gsheet_NTU")
+                content = '進入上傳模式(NTU pyxl作業)\n請輸入網址:(離開模式輸入L或l)'
+                LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text=content))
+                break
             if case('userid'):
                 push_text(userid, "userid : "+event.source.user_id)
                 push_text('U4f9b4c95fcee10fc8c72ad40cbef90ca',event.message.text+", send by "+event.source.user_id)
@@ -116,7 +181,7 @@ def normal_mode(event, text, userid):
                 push_text(userid, 'test')
                 break
             if case('肚子餓') and userid != 'U715b0aba205ddf78123b47ffb8f28f52': #如果是妹妹，就不能說不好的話
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text='乾我什麼事'))
+                LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text='乾我什麼事'))
                 break
             if case('變身'):
                 push_image(userid, 'https://i.imgur.com/zTbh6K1.jpg', 'https://i.imgur.com/CNhnRs2.jpg')
@@ -126,7 +191,7 @@ def normal_mode(event, text, userid):
                 break
             if case('等'):
                 sleep(20)
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text='乾我什麼事'))
+                LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text='乾我什麼事'))
                 break
             if case('q'):
                 message = TextSendMessage(
@@ -168,7 +233,7 @@ def normal_mode(event, text, userid):
                     )
                 )
                 
-                line_bot_api.reply_message(event.reply_token, message)
+                LINE_BOT_API.reply_message(event.reply_token, message)
                 break
             if case('push'):
                 push_text('Udd66eba9352626779fee2fff43c79f82', 'i am bobo') #蕭瑞昕的ID
@@ -176,8 +241,8 @@ def normal_mode(event, text, userid):
             if case():
                 print(event.reply_token)
                 reply_text(event, event.message.text) #回應同一個訊息
-                #line_bot_api.push_message('U4f9b4c95fcee10fc8c72ad40cbef90ca', TextSendMessage(text=event.message.text+", send by "+event.source.user_id))
-                #line_bot_api.reply_message(event.reply_token, TextSendMessage(text=event.message.text+'2'))
+                #LINE_BOT_API.push_message('U4f9b4c95fcee10fc8c72ad40cbef90ca', TextSendMessage(text=event.message.text+", send by "+event.source.user_id))
+                #LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text=event.message.text+'2'))
                 break
 
     except Exception as e:
@@ -186,13 +251,13 @@ def normal_mode(event, text, userid):
 
 def leave_mode(event, text, userid, mode):
     users.objects.filter(uid=userid).update(chat_mode="none")
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text='離開'+mode+'模式'))
+    LINE_BOT_API.reply_message(event.reply_token, TextSendMessage(text='離開'+mode+'模式'))
 
 def reply_text(event, text):
     try:
         message = TextSendMessage(text=text)
         token = event.reply_token
-        line_bot_api.reply_message(token, message)
+        LINE_BOT_API.reply_message(token, message)
     except Exception as e:
         getException(e)
 
@@ -203,7 +268,7 @@ def reply_image(event, original, preview):
             preview_image_url = preview
         )
         token = event.reply_token
-        line_bot_api.reply_message(token, message)
+        LINE_BOT_API.reply_message(token, message)
     except Exception as e:
         getException(e)
 
@@ -214,7 +279,7 @@ def reply_sticker(event, package = 1, sticker = 1):
             sticker_id = sticker
         )
         token = event.reply_token
-        line_bot_api.reply_message(token, message)
+        LINE_BOT_API.reply_message(token, message)
     except Exception as e:
         getException(e)
 
@@ -227,14 +292,14 @@ def reply_location(event, title="", address="", latitude=0.0, longtitude=0.0):
             longtitude=longtitude
         )
         token = event.reply_token
-        line_bot_api.push_message(token, message)
+        LINE_BOT_API.push_message(token, message)
     except Exception as e:
         getException(e)
 
 def push_text(userid, text):
     try:
         message = TextSendMessage(text=text)
-        line_bot_api.push_message(userid, message)
+        LINE_BOT_API.push_message(userid, message)
     except Exception as e:
         getException(e)
 
@@ -244,7 +309,7 @@ def push_image(userid, original, preview):
             original_content_url = original,
             preview_image_url = preview
         )
-        line_bot_api.push_message(userid, message)
+        LINE_BOT_API.push_message(userid, message)
     except Exception as e:
         getException(e)
 
@@ -254,7 +319,7 @@ def push_sticker(userid, package = 1, sticker = 1):
             package_id = package,
             sticker_id = sticker
         )
-        line_bot_api.push_message(userid, message)
+        LINE_BOT_API.push_message(userid, message)
     except Exception as e:
         getException(e)
 
@@ -266,7 +331,7 @@ def push_location(userid, title="", address="", latitude=0.0, longtitude=0.0):
             latitude=latitude,
             longtitude=longtitude
         )
-        line_bot_api.push_message(userid, message)
+        LINE_BOT_API.push_message(userid, message)
     except Exception as e:
         getException(e)
 
@@ -290,7 +355,7 @@ def push_quickreply(userid, buttons):
                 ]
             )
         )
-        line_bot_api.push_message(userid, message)
+        LINE_BOT_API.push_message(userid, message)
     except Exception as e:
         getException(e)
 
