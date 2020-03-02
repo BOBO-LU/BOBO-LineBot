@@ -1,0 +1,1 @@
+web: gunicorn --pythonpath bobo-linebot\bobo-linebot bobo-linebot\bobo-linebot.wsgi

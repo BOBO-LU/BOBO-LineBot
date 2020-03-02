@@ -20,7 +20,7 @@ def get_web_title(url):
         return doc
     
 def get_web_title_selenium(url):
-    webdriver_path = "C:\\Users\\呂文楷\\Desktop\\BOBO LineBot\\bobo_linebot\\bobo_linebot\\chromedriver.exe"
+    webdriver_path = "C:\\Users\\呂文楷\\Desktop\\BOBO-LineBot\\bobo-linebot\\bobo-linebot\\chromedriver.exe"
     options = Options()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--test-type')
@@ -45,7 +45,7 @@ def update_googlesheet(url='none'):
     title = get_web_title(url)
 
     # 驗證
-    gc = pygsheets.authorize(service_file=r"C:\\Users\\呂文楷\\Desktop\\BOBO LineBot\\bobo_linebot\\bobo_linebot\\learned-ocean-268201-24e7267e7e4a.json")
+    gc = pygsheets.authorize(service_file=r"C:\\Users\\呂文楷\\Desktop\\BOBO-LineBot\\bobo-linebot\\bobo-linebot\\learned-ocean-268201-24e7267e7e4a.json")
     print("gc:", gc)
 
     #選擇gsheet

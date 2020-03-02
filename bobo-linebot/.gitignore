@@ -1,0 +1,7 @@
+# application/views.py
+bobo-linebot/settings.py
+
+*.pyc
+*.cpython-37.pyc
+
+bobo-linebot/learned-ocean-268201-24e7267e7e4a.json

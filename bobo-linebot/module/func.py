@@ -33,31 +33,34 @@ def text_mode_filter(event):
 
     text = event.message.text.lower()
     userid = event.source.user_id
+    try:
+        #檢查資料庫是否有userid，沒有的話插入
+        if not users.objects.filter(uid=userid).exists():
+            unit = users.objects.create(uid=userid, chat_mode="none")
+            unit.save()
 
-    #檢查資料庫是否有userid，沒有的話插入
-    if not users.objects.filter(uid=userid).exists():
-        unit = users.objects.create(uid=userid, chat_mode="none")
-        unit.save()
+        #取得userid在資料庫中chat_mode的欄位
+        mode = users.objects.filter(uid=userid).values('chat_mode')[0]['chat_mode']
 
-    #取得userid在資料庫中chat_mode的欄位
-    mode = users.objects.filter(uid=userid).values('chat_mode')[0]['chat_mode']
+        for case in switch(mode):
+            if case('stock'):
+                stock_mode(event, text, userid, mode)
+                break
+            if case('bullshit'):
+                bullshit_mode(event, text, userid, mode)
+                break
+            if case('gsheet'):
+                gsheet_mode(event, text, userid, mode)
+                break
+            if case('gsheet_NTU'):
+                gsheet_NTU_mode(event, text, userid, mode)
+                break
+            if case():
+                normal_mode(event, text, userid)
+                break
+    except Exception as e:
+        getException(e)
 
-    for case in switch(mode):
-        if case('stock'):
-            stock_mode(event, text, userid, mode)
-            break
-        if case('bullshit'):
-            bullshit_mode(event, text, userid, mode)
-            break
-        if case('gsheet'):
-            gsheet_mode(event, text, userid, mode)
-            break
-        if case('gsheet_NTU'):
-            gsheet_NTU_mode(event, text, userid, mode)
-            break
-        if case():
-            normal_mode(event, text, userid)
-            break
 
 def bullshit_mode(event, text, userid, mode):
     """用戶為bullshit_mode下的語句判斷"""
@@ -76,6 +79,7 @@ def bullshit_mode(event, text, userid, mode):
                 reply_text(event, mode+' mode')
                 break
             if case():
+                print('get into bulshit')
                 content = str(mode_bullshit.bullshit(text))
                 reply_text(event, content)
                 break
