@@ -12,7 +12,7 @@ from time import sleep
 
 class bullshit():
     def __init__(self, topic = '機器人', length = 100):
-        webdriver_path = "C:\\Users\\USER\\Desktop\\a資料\\python\\練習\\BOBO-LineBot\\bobo_linebot\\module\\chromedriver.exe"
+        webdriver_path = "C:\\Users\\呂文楷\\Desktop\\BOBO-LineBot\\bobo-linebot\\bobo-linebot\\chromedriver.exe"
         weburl = "https://howtobullshit.me/" #前往這個網址
 
         options = Options()
