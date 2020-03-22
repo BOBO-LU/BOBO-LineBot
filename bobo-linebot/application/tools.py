@@ -12,7 +12,7 @@ class switch(object):
         raise StopIteration
     
     def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
+        """Indicate whether or not to eㄘnter a case suite"""
         if self.fall or not args:
             return True
         elif self.value in args: # changed for v1.5, see below
